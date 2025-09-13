@@ -2,7 +2,7 @@
 
 This is the scenario we end up with by following the first page **Hello Minikube** (https://kubernetes.io/docs/tutorials/hello-minikube/):
 
-![scenario](https://github.com/joellindberg/kubernetes-lab/raw/main/kind/kubernetes-lab-kind-01.png)
+![scenario](https://github.com/joellindberg/kubernetes-lab/raw/main/kind/kubernetes-lab-kind-02.png)
 hello-node
 
 
