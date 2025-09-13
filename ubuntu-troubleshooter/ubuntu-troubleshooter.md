@@ -1,6 +1,9 @@
-`docker build -t ubuntu-troubleshooter .`
+# ubuntu-troubleshooter
 
-`docker run -it --network opensearch-net ubuntu-troubleshooter bash`
+~~~bash
+docker build -t ubuntu-troubleshooter .
+docker run -it --network kind ubuntu-troubleshooter bash
+~~~
 
 
 Or it's possible quickly without a Dockerfile:

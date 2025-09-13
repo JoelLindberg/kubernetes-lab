@@ -17,6 +17,15 @@ I will perform this lab inside of WSL2 with Docker Engine.
 
 The goal is to next experiment with a production setup next. Managed kubernetes or k3s depending on the situation.
 
+* k3s
+    - Reqs: https://docs.k3s.io/installation/requirements
+        - 2 VMs (can be run in docker): 1 master (2 CPU 2GB) and 1 node (1 CPU 512MB)
+        - Database: MySQL, PostgreSQL, etcd
+    - https://docs.k3s.io/quick-start
+* k3d:
+    - Allows to setup k3s easily in docker for development or test purposes
+    - https://k3d.io/stable/
+
 
 
 ## Kubernetes components
@@ -35,6 +44,7 @@ The goal is to next experiment with a production setup next. Managed kubernetes 
 * kubectl
     - https://kubernetes.io/docs/tasks/tools/#kubectl
     - You must use a kubectl version that is within one minor version difference of your cluster. For example, a v1.34 client can communicate with v1.33, v1.34, and v1.35 control planes.
+* Reference: https://kubernetes.io/docs/reference/kubectl/
 * kuberc
     - A plugin for Kubernetes command-line tool kubectl, which allows you to convert manifests between different API versions.
     - Skipping this one for this lab, but useful to know for production maintenance
