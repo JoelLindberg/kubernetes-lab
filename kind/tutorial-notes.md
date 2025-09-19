@@ -19,7 +19,6 @@ k config view
 # get logs - first identify the name
 k get pods
 k logs hello-node-6c9b5f4b59-d8fn6
-
 ~~~
 
 
