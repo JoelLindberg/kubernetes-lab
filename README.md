@@ -1,6 +1,6 @@
 # kubernetes-lab
 
-Learning Kubernetes. Skipping minikube as it abstracts too many details.
+Learning Kubernetes. Skipping minikube as it abstracts too many details. This will serve primarily as a reference for commands but also to document the setup of the lab environment.
 
 *A lot of the notes are mixed with copy/paste info from the official our third party sources. Trying to move with diligence but the reality is I have limited amount of time to at my disposal currently.*
 

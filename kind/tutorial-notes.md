@@ -26,8 +26,8 @@ Create a Service
     By default, the Pod is only accessible by its internal IP address within the Kubernetes cluster. To make the hello-node Container accessible from outside the Kubernetes virtual network, you have to expose the Pod as a Kubernetes Service.
 
 ~~~bash
-kubectl expose deployment hello-node --type=LoadBalancer --port=8080
-kubectl get services
+k expose deployment hello-node --type=LoadBalancer --port=8080
+k get services
 
 ~~~
 
@@ -73,28 +73,77 @@ done
 I'm using the ubuntu-troubleshooter (on the same network "kind" as the "kind" kubernetes service) primarily to access the published load balanced kubernetes services. This is to minimize any strange behaviour due to the layers between docker engine, wsl2 or the host.
 
 
+Cleanup:
+~~~bash
+k delete service hello-node
+k delete deployment hello-node
+~~~
 
 
 
-
-## troubleshooting
+## troubleshooting metallb deployment
 
 Some commands I used when trying to get metallb working.
 
 ~~~bash
-kubectl get pods --all-namespaces
+k get pods --all-namespaces
 k get service --namespace metallb-system
-kubectl get svc -A | grep LoadBalancer
+k get svc -A | grep LoadBalancer
 
-kubectl get svc foo-service
-kubectl logs -n metallb-system deploy/controller
+k get svc foo-service
+k logs -n metallb-system deploy/controller
 
 docker network ls
 docker network inspect kind
 
 #To force a restart of the MetalLB service (or any) in your Kubernetes cluster, especially after updating its configuration or IP pool, the cleanest way is to delete its pods—Kubernetes will automatically recreate them. This ensures the controller and speaker #components reload the latest config and reprocess any pending LoadBalancer services.
 
-kubectl delete pod --all -n metallb-system
+k delete pod --all -n metallb-system
 ~~~
 
 If access outside of WSL2 would be needed (never tried this): `kubectl port-forward --address 0.0.0.0 svc/foo-service 8080:5678`
+
+
+## Deploy an app
+
+https://kubernetes.io/docs/tutorials/kubernetes-basics/deploy-app/deploy-intro/
+
+*Refresher: A deployment creates and runs the app while the service is then created to expose your application*
+
+    https://kubernetes.io/docs/concepts/services-networking/service/
+
+
+~~~bash
+k create deployment kubernetes-bootcamp --image=gcr.io/google-samples/kubernetes-bootcamp:v1
+k get deployments
+k get pods
+~~~
+
+The deployment did the following:
+* searched for a suitable node where an instance of the application could be run (we have only 1 available node)
+* scheduled the application to run on that Node
+* configured the cluster to reschedule the instance on a new Node when needed
+
+
+    The kubectl proxy command can create a proxy that will forward communications into the cluster-wide, private network. The proxy can be terminated by pressing control-C and won't show any output while it's running.
+
+    The API server will automatically create an endpoint for each pod, based on the pod name, that is also accessible through the proxy.
+
+~~~bash
+k proxy # starts a proxy on 127.0.0.1:8001 which you can communicate through
+curl http://localhost:8001/version # open in a new shell and contact the API
+
+# it's now also possible to access the pods through the proxy. Let's connect to our foo and bar apps:
+curl http://localhost:8001/api/v1/namespaces/default/pods/bar-app:8080/proxy/
+curl http://localhost:8001/api/v1/namespaces/default/pods/foo-app:8080/proxy/
+# the new app we started:
+curl http://localhost:8001/api/v1/namespaces/default/pods/kubernetes-bootcamp-658f6cbd58-8hnt5:8080/proxy/
+~~~
+
+
+
+## Viewing Pods and Nodes
+
+https://kubernetes.io/docs/tutorials/kubernetes-basics/explore/explore-intro/
+
+
