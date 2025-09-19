@@ -7,6 +7,8 @@ hello-node
 
 
 
+## hello-minikube (but with kind)
+
 ~~~bash
 k create deployment hello-node --image=registry.k8s.io/e2e-test-images/agnhost:2.53 -- /agnhost netexec --http-port=8080
 k get deployments.apps
@@ -28,7 +30,6 @@ Create a Service
 ~~~bash
 k expose deployment hello-node --type=LoadBalancer --port=8080
 k get services
-
 ~~~
 
 
@@ -36,27 +37,33 @@ k get services
 
 Since I'm running kind and not minikube I can't run `minikube service hello-node`.
 
-I'm instead referencing:
+I'm instead setting up metallb and a cloud load balancer:
 
-* https://kind.sigs.k8s.io/docs/user/loadbalancer
-    - This will setup a cloud balancer
 * https://metallb.io/installation/
     - This is required for the loadbalancer to be able to request an external IP to use for the services
 
 **metallb**
 ~~~bash
+# note the output IP
 docker network inspect kind -f '{{(index .IPAM.Config 0).Subnet}}'
 
 k apply -f https://raw.githubusercontent.com/metallb/metallb/v0.15.2/config/manifests/metallb-native.yaml
-k apply -f metallb-config.yml
+# first update the IP range in this file based on the previous output to match Docker's internal network for kind:
+k apply -f metallb-config.yml 
 ~~~
 
 **Cloud loadbalancer**
 
-`go install sigs.k8s.io/cloud-provider-kind@latest`
+* https://kind.sigs.k8s.io/docs/user/loadbalancer
+
+~~~bash
+# this obviously requires go to already be installed
+go install sigs.k8s.io/cloud-provider-kind@latest
+~~~
 
     Cloud Provider KIND runs as a standalone binary in your host and connects to your KIND cluster and provisions new Load Balancer containers for your Services. It requires privileges to open ports on the system and to connect to the container runtime.
 
+Verify that it works:
 ~~~bash
 k apply -f kind-cloud-lb.yml
 k get svc foo-service
@@ -69,11 +76,18 @@ for _ in {1..10}; do
 done
 ~~~
 
+metallb and cloud load balancer is now setup.
 
-I'm using the ubuntu-troubleshooter (on the same network "kind" as the "kind" kubernetes service) primarily to access the published load balanced kubernetes services. This is to minimize any strange behaviour due to the layers between docker engine, wsl2 or the host.
+Cleanup the after the metallb and cloud load balancer setup:
+~~~bash
+k delete -f kind-cloud-lb.yml
+~~~
 
 
-Cleanup:
+
+Continue the kubernetes tutorial:
+
+Cleanup the hello-node service and deployment:
 ~~~bash
 k delete service hello-node
 k delete deployment hello-node
@@ -81,7 +95,9 @@ k delete deployment hello-node
 
 
 
-## troubleshooting metallb deployment
+
+
+### troubleshooting metallb deployment
 
 Some commands I used when trying to get metallb working.
 
@@ -102,6 +118,8 @@ k delete pod --all -n metallb-system
 ~~~
 
 If access outside of WSL2 would be needed (never tried this): `kubectl port-forward --address 0.0.0.0 svc/foo-service 8080:5678`
+
+
 
 
 ## Deploy an app

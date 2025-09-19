@@ -7,7 +7,7 @@ Learning Kubernetes. Skipping minikube as it abstracts too many details. This wi
 
 ## Lab 1 - kind
 
-I will perform this lab inside of WSL2 with Docker Engine.
+I will perform this lab on a laptop running Ubuntu. This will also work in WSL2 with Ubuntu running with Docker Engine.
 
 * Main tutorial: https://kubernetes.io/docs/tutorials/hello-minikube/
 * kind: https://kind.sigs.k8s.io/docs/user/quick-start/#configuring-your-kind-cluster
@@ -58,11 +58,13 @@ The goal is to next experiment with a production setup next. Managed kubernetes 
 Auto-completion for kubectl:
 
 Bash completion already installed? `type _init_completion`
-Enable kubectl completion: `echo 'source <(kubectl completion bash)' >>~/.bashrc`
 
-Extend your alias "k" with autocompletion:
 ~~~~bash
-echo 'alias k=kubectl' >>~/.bashrc
+# Enable kubectl completion
+echo 'source <(kubectl completion bash)' >>~/.bashrc
+
+# Extend your alias "k" with autocompletion:
+echo 'alias k=kubectl' >>~/.bashrc 
 echo 'complete -o default -F __start_kubectl k' >>~/.bashrc
 ~~~~
 
