@@ -5,26 +5,10 @@ Learning Kubernetes. Skipping minikube as it abstracts too many details. This wi
 *A lot of the notes are mixed with copy/paste info from the official our third party sources. Trying to move with diligence but the reality is I have limited amount of time to at my disposal currently.*
 
 
-## Lab 1 - kind
-
-I will perform this lab on a laptop running Ubuntu. This will also work in WSL2 with Ubuntu running with Docker Engine.
+This lab was executed using Ubuntu. Both WSL2 and Ubuntu Desktop.
 
 * Main tutorial: https://kubernetes.io/docs/tutorials/hello-minikube/
 * kind: https://kind.sigs.k8s.io/docs/user/quick-start/#configuring-your-kind-cluster
-
-
-## Lab 2 - k3s / Managed kubernetes in a public cloud
-
-The goal is to next experiment with a production setup next. Managed kubernetes or k3s depending on the situation.
-
-* k3s
-    - Reqs: https://docs.k3s.io/installation/requirements
-        - 2 VMs (can be run in docker): 1 master (2 CPU 2GB) and 1 node (1 CPU 512MB)
-        - Database: MySQL, PostgreSQL, etcd
-    - https://docs.k3s.io/quick-start
-* k3d:
-    - Allows to setup k3s easily in docker for development or test purposes
-    - https://k3d.io/stable/
 
 
 
