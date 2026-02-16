@@ -1,16 +1,18 @@
 # kubernetes-lab
 
-Learning Kubernetes. Skipping minikube as it abstracts too many details. This will serve primarily as a reference for commands but also to document the setup of the lab environment.
+![Gitleaks Status](https://github.com/JoelLindberg/kubernetes-lab/actions/workflows/gitleaks.yml/badge.svg)
+
+Learning Kubernetes.
 
 *A lot of the notes are mixed with copy/paste info from the official our third party sources. Trying to move with diligence but the reality is I have limited amount of time to at my disposal currently.*
 
+These labs were executed using Ubuntu. Both WSL2 and Ubuntu Desktop.
 
-This lab was executed using Ubuntu. Both WSL2 and Ubuntu Desktop.
-
-* Main tutorial: https://kubernetes.io/docs/tutorials/hello-minikube/
-* kind: https://kind.sigs.k8s.io/docs/user/quick-start/#configuring-your-kind-cluster
-
-
+* lab1:
+    * https://kubernetes.io/docs/tutorials/hello-minikube/
+    * kind: https://kind.sigs.k8s.io/docs/user/quick-start/#configuring-your-kind-cluster
+* lab2:
+    * https://docs.k3s.io/installation
 
 ## Kubernetes components
 
