@@ -8,11 +8,12 @@ Learning Kubernetes.
 
 These labs were executed using Ubuntu. Both WSL2 and Ubuntu Desktop.
 
-* lab1:
+* kind-lab:
     * https://kubernetes.io/docs/tutorials/hello-minikube/
     * kind: https://kind.sigs.k8s.io/docs/user/quick-start/#configuring-your-kind-cluster
-* lab2:
+* k3s-lab:
     * https://docs.k3s.io/installation
+
 
 ## Kubernetes components
 
@@ -55,5 +56,3 @@ echo 'complete -o default -F __start_kubectl k' >>~/.bashrc
 ~~~~
 
 Reload: `source ~/.bashrc`
-
-

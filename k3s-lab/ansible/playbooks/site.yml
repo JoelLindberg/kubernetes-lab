@@ -1,0 +1,7 @@
+---
+- name: Setup k3s HA Cluster
+  hosts: k3s
+  become: true
+  serial: 1
+  roles:
+    - k3s

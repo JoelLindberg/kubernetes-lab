@@ -1,0 +1,116 @@
+---
+- name: Install firewalld and dependencies
+  dnf:
+    name:
+      - firewalld
+      - python3-firewall
+    state: present
+
+- name: Start and enable firewalld
+  service:
+    name: firewalld
+    state: started
+    enabled: yes
+
+- name: Enable TCP Firewall ports
+  firewalld:
+    port: "{{ item }}/tcp"
+    permanent: yes
+    state: enabled
+    immediate: yes
+  loop: "{{ firewall_ports_tcp }}"
+  when: ansible_os_family == 'RedHat'
+
+- name: Enable UDP Firewall ports
+  firewalld:
+    port: "{{ item }}/udp"
+    permanent: yes
+    state: enabled
+    immediate: yes
+  loop: "{{ firewall_ports_udp }}"
+  when: ansible_os_family == 'RedHat'
+
+- name: Install SELinux dependencies
+  dnf:
+    name: 
+      - container-selinux
+      - policycoreutils-python-utils
+    state: present
+
+- name: Add k3s-selinux yum repository
+  yum_repository:
+    name: rancher-k3s-common
+    description: Rancher K3s Common
+    baseurl: https://rpm.rancher.io/k3s/stable/common/centos/9/noarch
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: https://rpm.rancher.io/public.key
+
+- name: Install k3s-selinux
+  dnf:
+    name: k3s-selinux
+    state: present
+
+- name: Disable SELinux
+  selinux:
+    state: disabled
+
+- name: Download k3s install script
+  get_url:
+    url: https://get.k3s.io
+    dest: /tmp/k3s_install.sh
+    mode: '0700'
+
+- name: Create k3s config directory
+  file:
+    path: /etc/rancher/k3s
+    state: directory
+    mode: '0755'
+
+- name: Copy k3s config file
+  template:
+    src: config.yaml.j2
+    dest: /etc/rancher/k3s/config.yaml
+    mode: '0600'
+  notify: Restart k3s
+
+- name: Initialize k3s cluster (first node)
+  shell: >-
+    /tmp/k3s_install.sh server
+  environment:
+    INSTALL_K3S_VERSION: "{{ k3s_version }}"
+  args:
+    creates: /etc/systemd/system/k3s.service
+  when: inventory_hostname == k3s_init_node_host
+
+- name: Wait for k3s API on first node
+  wait_for:
+    host: "{{ k3s_init_node_ip }}"
+    port: 6443
+    state: started
+    delay: 5
+    timeout: 300
+  when: inventory_hostname != k3s_init_node_host
+
+- name: Populate service facts
+  service_facts:
+
+- name: Join k3s cluster (HA)
+  shell: >-
+    /tmp/k3s_install.sh server
+  environment:
+    INSTALL_K3S_VERSION: "{{ k3s_version }}"
+  when: 
+    - inventory_hostname != k3s_init_node_host
+    - >
+      ('k3s.service' not in ansible_facts.services) or
+      (ansible_facts.services['k3s.service'].state != 'running') or
+      (ansible_facts.services['k3s.service'].status != 'enabled')
+
+
+
+- name: Ensure k3s service is enabled/started
+  service:
+    name: k3s
+    state: started
+    enabled: yes

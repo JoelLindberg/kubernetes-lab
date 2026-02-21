@@ -1,0 +1,18 @@
+---
+k3s_version: "v1.32.1+k3s1"
+k3s_token: "supersecrettokenthatshouldbechanged"
+k3s_service_name: "k3s"
+k3s_init_node_host: "{{ groups['k3s'][0] }}" # Assumes the group in inventory is named 'k3s'
+k3s_init_node_ip: "{{ hostvars[groups['k3s'][0]]['ansible_host'] | default(groups['k3s'][0]) }}"
+
+firewall_ports_tcp:
+  - "6443"  # API Server
+  - "9345"  # K3s supervisor API (required for HA with embedded etcd)
+  - "2379"  # Etcd client
+  - "2380"  # Etcd peer
+  - "10250" # Kubelet metrics
+  - "30000-32767" # NodePort Range (Optional but good for access)
+firewall_ports_udp:
+  - "8472"  # Flannel VXLAN
+  - "51820" # Flannel WireGuard (If used)
+  - "30000-32767" # NodePort Range

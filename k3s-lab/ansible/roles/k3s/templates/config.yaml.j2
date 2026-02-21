@@ -1,0 +1,29 @@
+token: {{ k3s_token }}
+tls-san:
+  - {{ k3s_init_node_ip }}
+{% if inventory_hostname == k3s_init_node_host %}
+cluster-init: true
+{% else %}
+server: https://{{ k3s_init_node_ip }}:6443
+{% endif %}
+disable-cloud-controller: true
+disable:
+  - servicelb
+  - metrics-server
+  - traefik
+  - local-storage
+write-kubeconfig-mode: 644
+# Tuning etcd and control plane components to mitigate performance issues due to running on a laptop
+etcd-arg:
+  - "heartbeat-interval=5000"
+  - "election-timeout=50000"
+kube-controller-manager-arg:
+  - "leader-elect-lease-duration=60s"
+  - "leader-elect-renew-deadline=40s"
+  - "leader-elect-retry-period=10s"
+kube-scheduler-arg:
+  - "leader-elect-lease-duration=60s"
+  - "leader-elect-renew-deadline=40s"
+  - "leader-elect-retry-period=10s"
+kube-apiserver-arg:
+  - "request-timeout=60s"
