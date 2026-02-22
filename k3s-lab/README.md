@@ -18,16 +18,14 @@ Prep VMs:
 5. Optional: `cd ansible && ansible -i inv/lab.ini -u k3slab -b -m shell -a 'dnf upgrade -y' all` \
     *This step will take a while and should possibly be followed up with a reboot (and QEMU VMs power off by default with a reboot)*
 
-*If you are running AppArmor then you should have a decent isolation between the QEMU service and your home folder thanks to both AppArmor and QEMU even when you run `sudo bash deploy-vms.sh`.*
+    *If you are running AppArmor then you should have a decent isolation between the QEMU service and your home folder thanks to both AppArmor and QEMU even when you run `sudo bash deploy-vms.sh`.*
 
-Deploy k3s:
-6. `ansible-playbook -i inv/lab.ini playbooks/site.yml -u k3slab -b` \
+6. Deploy k3s: `ansible-playbook -i inv/lab.ini playbooks/site.yml -u k3slab -b` \
     *Run from the ansible/ folder*
 
-It took roughly 30-45 minutes after the above steps had run before the cluster nodes *calmed* in terms of CPU and I/O usage. After that it became a usable cluster to continue experimenting with. Temporary increase of timeout values set in config.yaml for this reason.
+    It took roughly 30-45 minutes after the above steps had run before the cluster nodes *calmed* in terms of CPU and I/O usage. After that it became a usable cluster to continue experimenting with. Temporary increase of timeout values set in config.yaml for this reason.
 
-Manage VMs:
-7. SSH to a specific node: `ssh -F ssh.cfg k3s1`
+7. Manage VMs: SSH to a specific node: `ssh -F ssh.cfg k3s1`
 
 
 ## Make
@@ -88,6 +86,34 @@ VM images should be moved to: `/var/lib/libvirt/images/`
 QEMU creates a VM as a separate process, so you can check the CPU usage by using 'top'. In libvirt terminology, a Domain is the VM itself. On your host OS, that domain is manifested as a single QEMU process.
 
 If you give a VM 4 vCPUs, you won't see 4 separate processes in top. Instead, you will see one process that spawns multiple threads (one for each vCPU, plus threads for I/O and graphics).
+
+### Networking
+
+I was surprised to see that both these two parameters for `virt-install` resulted in a NAT operation out to the outside network:
+
+* `--network network=default`
+* `--network bridge=virbr0`
+
+To get an IP from your physical router (e.g., 192.168.1.x), you'd have to bypass the virtual virbr0 entirely. You'd need a Host Bridge that is tied to your physical Ethernet port (often named br0).
+
+Why `virt-install` behaves this way when using `virbr0`:
+
+* `--network network=default`: This tells libvirt, "Use the high-level configuration named 'default'." Libvirt looks at that config, sees it points to `virbr0`, and handles the DHCP for you.
+* `--network bridge=virbr0`: This tells libvirt, "Don't look at the high-level config; just plug the VM's wire directly into the interface named `virbr0`."
+
+**The result is the same** because `virbr0` is already hard-coded on your host to perform NAT and run a DHCP server.
+
+
+The Anatomy of the `virbr0` "Bridge"
+
+When you use `virbr0`, libvirt essentially sets up a three-part system behind the scenes:
+
+1. **The Switch (Bridge)**: `virbr0` acts as a virtual layer-2 switch. All your VMs "plug" their virtual cables into this.
+2. **The DHCP/DNS Server**: Libvirt starts a hidden instance of `dnsmasq`. This is what hands your VMs the **192.168.122.x** IPs.
+3. **The Router (iptables/nftables)**: This is the "NAT" part. Your Linux host uses its firewall rules to masquerade the VM traffic. When a VM wants to reach Google, the host swaps the VM's internal IP for the host's physical IP before sending the packet to your home router.
+
+
+
 
 ### Using top Effectively
 

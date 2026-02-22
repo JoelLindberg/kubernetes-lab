@@ -7,7 +7,6 @@
 # Deployment configuration for QEMU VMs
 export K3S_LAB_SSH_KEY=$(cat /var/lib/libvirt/images/kubernetes-lab.pub)
 TEMPLATE="cloud-config.yml.tmpl"
-#CLOUDCONFIG="/var/lib/libvirt/images/cloud-config.yml"
 URL="https://repo.almalinux.org/almalinux/10/cloud/x86_64/images/AlmaLinux-10-GenericCloud-latest.x86_64.qcow2"
 IMAGE="/var/lib/libvirt/images/AlmaLinux-10-GenericCloud-latest.x86_64.qcow2"
 DOWNLOADS="$HOME/Downloads/$(basename "$IMAGE")"
@@ -33,11 +32,6 @@ if [ ! -f "/var/lib/libvirt/images/kubernetes-lab.pub" ]; then
         fi
     fi
 fi
-
-
-# Use 'envsubst' to create the usable file (Standard on Ubuntu)
-# This replaces ${K3S_LAB_SSH_KEY} with your actual key
-#envsubst < "$TEMPLATE" > "$CLOUDCONFIG"
 
 
 # Check if image exists, copy from Downloads if needed, or prompt to download
@@ -70,15 +64,15 @@ for NODE in "${NODES[@]}"; do
     virt-install \
      	--connect qemu:///system \
         --name "$NODE" \
-        --memory 4096 \
+        --memory 2048 \
         --vcpus 4 \
         --os-variant almalinux10 \
-	--cpu host-passthrough \
+	    --cpu host-passthrough \
         --disk size=10,backing_store="$IMAGE",bus=virtio \
         --cloud-init user-data="/var/lib/libvirt/images/cloud-config_${NODE}.yml" \
         --network bridge=virbr0 \
         --graphics spice \
-	--console pty,target_type=serial \
+	    --console pty,target_type=serial \
         --import \
         --noautoconsole
 

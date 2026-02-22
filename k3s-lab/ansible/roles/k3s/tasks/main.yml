@@ -74,39 +74,13 @@
     mode: '0600'
   notify: Restart k3s
 
-- name: Initialize k3s cluster (first node)
+- name: Install k3s server
   shell: >-
     /tmp/k3s_install.sh server
   environment:
     INSTALL_K3S_VERSION: "{{ k3s_version }}"
   args:
     creates: /etc/systemd/system/k3s.service
-  when: inventory_hostname == k3s_init_node_host
-
-- name: Wait for k3s API on first node
-  wait_for:
-    host: "{{ k3s_init_node_ip }}"
-    port: 6443
-    state: started
-    delay: 5
-    timeout: 300
-  when: inventory_hostname != k3s_init_node_host
-
-- name: Populate service facts
-  service_facts:
-
-- name: Join k3s cluster (HA)
-  shell: >-
-    /tmp/k3s_install.sh server
-  environment:
-    INSTALL_K3S_VERSION: "{{ k3s_version }}"
-  when: 
-    - inventory_hostname != k3s_init_node_host
-    - >
-      ('k3s.service' not in ansible_facts.services) or
-      (ansible_facts.services['k3s.service'].state != 'running') or
-      (ansible_facts.services['k3s.service'].status != 'enabled')
-
 
 
 - name: Ensure k3s service is enabled/started

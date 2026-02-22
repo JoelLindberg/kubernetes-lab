@@ -9,6 +9,8 @@ deploy:
 
 prep:
 	bash prep-ansible-inv.sh
+	@echo "Waiting 30 seconds for sshd to be ready..."
+	sleep 30
 
 hosts:
 	cd ansible && ansible-playbook -i inv/lab.ini playbooks/hosts.yml -u k3slab -b
